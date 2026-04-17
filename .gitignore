@@ -1,0 +1,17 @@
+# PURPOSE: Prevents secrets, build artifacts, and local state from being committed
+# CALLED BY: Git on every commit/status operation
+# DEPENDS ON: Nothing
+
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+*.faiss
+*.index
+logs/

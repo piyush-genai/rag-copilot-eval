@@ -1,0 +1,30 @@
+{
+  "_comment": "PURPOSE: OpenSearch Serverless index mapping for BM25 text field and KNN dense vector field",
+  "settings": {
+    "index": {
+      "knn": true
+    }
+  },
+  "mappings": {
+    "properties": {
+      "chunk_id":       { "type": "keyword" },
+      "source_runbook": { "type": "keyword" },
+      "section_name":   { "type": "text" },
+      "page_num":       { "type": "integer" },
+      "service_name":   { "type": "keyword" },
+      "team_owner":     { "type": "keyword" },
+      "severity_level": { "type": "keyword" },
+      "last_updated":   { "type": "date" },
+      "chunk_text":     { "type": "text", "analyzer": "english" },
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 1536,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib"
+        }
+      }
+    }
+  }
+}

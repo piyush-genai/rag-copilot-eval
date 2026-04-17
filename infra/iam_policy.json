@@ -1,0 +1,42 @@
+{
+  "_comment": "PURPOSE: Minimum IAM permission boundary for the Lambda ingestion role — see spec for rationale",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadSourceRunbooks",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+    },
+    {
+      "Sid": "ListBucketForTriggerValidation",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+    },
+    {
+      "Sid": "InvokeEmbeddingModel",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel"],
+      "Resource": "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0"
+    },
+    {
+      "Sid": "WriteToOpenSearch",
+      "Effect": "Allow",
+      "Action": ["aoss:APIAccessAll"],
+      "Resource": "arn:aws:aoss:REGION:ACCOUNT_ID:collection/runbooks-index"
+    },
+    {
+      "Sid": "WriteLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": "arn:aws:logs:REGION:ACCOUNT_ID:log-group:/aws/lambda/runbook-ingestion:*"
+    },
+    {
+      "Sid": "ReadEncryptionKey",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt", "kms:GenerateDataKey"],
+      "Resource": "arn:aws:kms:REGION:ACCOUNT_ID:key/YOUR_KEY_ID"
+    }
+  ]
+}
