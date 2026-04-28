@@ -15,3 +15,10 @@ build/
 *.faiss
 *.index
 logs/
+
+# Runbook corpus — PDFs and markdown are large binary/text files.
+# They live in data/runbooks/ locally but are NOT committed to git.
+# The .gitkeep files hold the directory structure in the repo.
+# To populate locally: copy your corpus into data/runbooks/pdf/ and data/runbooks/markdown/
+data/runbooks/pdf/
+data/runbooks/markdown/
