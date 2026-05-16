@@ -26,15 +26,17 @@ DEFAULT_MODEL_ID = "amazon.titan-embed-text-v2:0"
 
 # Maximum chunks per embedding API call.
 # Why 25: Bedrock Titan V2 batch limit. Exceeding this returns a validation error.
-BATCH_SIZE = 25
+# Note: If you're getting throttled frequently, reduce this to 10 or 5 to spread
+# the load over more API calls with longer gaps between them.
+BATCH_SIZE = 10  # Reduced from 25 to avoid throttling on new accounts
 
 # Retry configuration for throttling errors.
 # Why exponential backoff: Bedrock rate limits are per-account. During bulk
 # ingestion (200 runbooks × 10 chunks each = 2000 embedding calls), throttling
 # is expected. Exponential backoff spreads retries over time instead of hammering
 # the API immediately.
-MAX_RETRIES = 3
-INITIAL_BACKOFF_SECONDS = 1.0  # doubles on each retry: 1s, 2s, 4s
+MAX_RETRIES = 5  # Increased from 3 for new accounts with lower limits
+INITIAL_BACKOFF_SECONDS = 2.0  # Increased from 1.0 — starts at 2s, then 4s, 8s, 16s, 32s
 
 
 # ─── PUBLIC FUNCTION ──────────────────────────────────────────────────────────
@@ -98,6 +100,13 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
             batch_start, batch_end - 1, len(batch)
         )
 
+        # Add a small delay between batches to avoid rate limiting.
+        # Why 0.5s: Bedrock has per-second rate limits. Adding a gap between
+        # successful calls reduces the chance of hitting the limit.
+        # This adds ~40 seconds total for 2000 chunks (80 batches × 0.5s).
+        if batch_end < len(chunks):  # Don't sleep after the last batch
+            time.sleep(0.5)
+
     return chunks
 
 
@@ -132,7 +141,13 @@ def _embed_batch_with_retry(
         try:
             # Build the request body for Titan Embeddings V2.
             # Why inputText (not input_text): Bedrock API uses camelCase, not snake_case.
-            body = json.dumps({"inputText": texts[0] if len(texts) == 1 else texts})
+            # Why single string vs list: Titan V2 accepts either a single string or a list
+            # of strings. Single string returns {"embedding": [...]}, list returns
+            # {"embeddings": [[...], [...]]}.
+            if len(texts) == 1:
+                body = json.dumps({"inputText": texts[0]})
+            else:
+                body = json.dumps({"inputText": texts})
 
             # Call Bedrock InvokeModel.
             # Why InvokeModel (not InvokeModelWithResponseStream): embeddings are
