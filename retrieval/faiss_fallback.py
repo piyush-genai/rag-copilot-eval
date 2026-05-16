@@ -20,16 +20,18 @@ logger = logging.getLogger(__name__)
 # ─── CONFIGURATION ────────────────────────────────────────────────────────────
 
 # Titan Embeddings V2 produces 1536-dimensional vectors.
+# Local model (all-MiniLM-L6-v2) produces 384-dimensional vectors.
 # Why this constant: FAISS index must be created with the exact same dimension
 # as the vectors it will store. Mismatch causes a runtime error.
-EMBEDDING_DIM = 1536
+# When switching from local to Bedrock, rebuild the index with EMBEDDING_DIM=1536.
+EMBEDDING_DIM = 384  # Local model dimension (change to 1536 for Bedrock)
 
 # Default paths for persisting the FAISS index and metadata to disk.
 # Why separate files: FAISS stores only the raw float vectors — it has no
 # concept of metadata (chunk_id, source_runbook, etc.). We store metadata
 # in a parallel pickle file, keyed by the same integer index position.
 DEFAULT_INDEX_PATH = "data/faiss_index.bin"
-DEFAULT_METADATA_PATH = "data/faiss_metadata.pkl"
+DEFAULT_METADATA_PATH = "data/chunk_metadata.pkl"
 
 
 # ─── DATA STRUCTURES ──────────────────────────────────────────────────────────

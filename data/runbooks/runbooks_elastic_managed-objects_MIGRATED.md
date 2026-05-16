@@ -1,0 +1,1 @@
+If you are searching for Elastic configuration previously store in this location, it. has like been imported and now managed by Terraform in this [repo](https://gitlab.com/gitlab-com/gl-infra/observability/elastic-cloud)
